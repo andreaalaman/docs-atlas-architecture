@@ -9,7 +9,7 @@ Financial Crime Mitigation with MongoDB Atlas
    :values: tutorial
 
 .. meta:: 
-   :keywords: RAG, Atlas
+   :keywords: Financial Crime, Atlas, Fraud, AML, AI
    :description: Complete implementation guide for building a unified fraud detection and AML/KYC compliance system using MongoDB's document model, advanced search capabilities and more.
 
 .. contents:: On this page
@@ -17,8 +17,6 @@ Financial Crime Mitigation with MongoDB Atlas
    :backlinks: none
    :depth: 1
    :class: singlecol
-
-Optimize AI with MongoDB & Fireworks AI: Faster inference, reduced costs, and efficient RAG applications.
 
 **Use cases:** `Artifical Intelligence
 <https://www.mongodb.com/use-cases/artificial-intelligence>`__, `Intelligent Search <https://www.mongodb.com/solutions/use-cases/intelligent-search>`__, `Single View <https://www.mongodb.com/solutions/use-cases/single-view>`__
@@ -35,61 +33,39 @@ Optimize AI with MongoDB & Fireworks AI: Faster inference, reduced costs, and ef
 Solution Overview
 ------------------
 
-As banking becomes fully digital with instant payments, open finance
-APIs, and mobile‑first onboarding, it opens new pathways for
-cyberattacks and abuse. Financial institutions now have milliseconds to
-detect, prevent, and react to suspicious activity without degrading
-customer experience. Meeting this challenge requires modern, AI‑powered
-platforms rather than fragmented, batch‑driven systems. For a broader
-discussion of this landscape, see the Financial Crime Mitigation series
-overview.
-
-**Moving Beyond Concepts to Working Code**
-
 This solution showcases MongoDB's capabilities for financial crime
-prevention. You get real-time transaction screening with vector
-embeddings, sophisticated entity resolution with $rankFusion hybrid
+prevention. Real-time transaction screening with vector
+embeddings, entity resolution with $rankFusion hybrid
 search, LLM-powered risk classification and case generation,
 relationship network traversal with $graphLookup, and dynamic risk
 models that update without system downtime.
 
-Figure 1 shows the ThreatSight 360 high-level overview, organized into
-five core modules that together implement an end‑to‑end entity
-resolution and financial crime mitigation workflow:  
+Figure 1 presents a high-level overview of the Financial Crime
+Mitigation Platform (“ThreatSight 360”), illustrating the end-to-end
+entity resolution and financial crime mitigation workflow, which focuses
+on the following key capabilities:
   
-1. Ingestion and normalization: Ingest streaming and batch feeds from
-   core banking, payments, KYC, CRM, and third‑party providers into MongoDB
-   Atlas. Standardize identifiers and document structure so downstream
-   services consume a consistent data model.  
-2. Search and entity resolution: Use MongoDB Atlas Search for fuzzy,
-   text‑based matching (names, addresses, identifiers) and MongoDB Atlas
-   Vector Search for semantic similarity. Run both in parallel and merge
-   the results with `$rankFusion` to produce a single ranked candidate list
-   for each onboarded or investigated entity.  
-3. Network analysis and graph traversal: Store explicit and inferred
-   relationships in a dedicated collection. Use `$graphLookup` and
-   aggregation pipelines to traverse multi‑hop networks, uncover hidden
-   links, and enrich entity context with connectivity metrics.  
-4. AI‑assisted risk assessment: Package entity profiles, transaction
-   histories, search matches, and network context into prompts for an LLM
-   such as AWS Bedrock Claude‑3 Sonnet. The model evaluates risk
-   indicators, explains rationale, and recommends next‑best actions under
-   your institution’s policies and risk appetite.  
-5. Case management and reporting: Store case files, analyst notes,
-   LLM‑generated narratives, and audit trails as MongoDB documents. This
-   creates a consistent, queryable record for compliance teams, internal
-   audit, and regulators, and enables analytics on outcomes and
-   false‑positive reduction. 
+- **Fraud detection flow**: Demonstrates an end-to-end, real-time pipeline where a “Transaction Simulator” generates synthetic events to exercise fraud scenarios, a “Fraud Detection Engine” enriches each transaction with customer profile data, applies rules, performs vector search, and generates embeddings via AWS Bedrock, and a “Risk Model Engine” manages dynamic, versioned risk models that are updated in real time using MongoDB Change Streams to ensure decisions always reflect the latest risk logic.
+- **Search and entity resolution**: Use MongoDB Atlas Search for fuzzy, text‑based matching (names, addresses, identifiers) and MongoDB Atlas Vector Search for semantic similarity. Run both in parallel and merge the results with `$rankFusion` to produce a single ranked candidate list for each onboarded or investigated entity.  
+- **Network analysis and graph traversal**: Store explicit and inferred relationships in a dedicated collection. Use `$graphLookup` and aggregation pipelines to traverse multi‑hop networks, uncover hidden links, and enrich entity context with connectivity metrics.  
+- **AI‑assisted risk assessment**: Package entity profiles, transaction histories, search matches, and network context into prompts for an LLM such as AWS Bedrock Claude‑3 Sonnet. The model evaluates risk indicators, explains rationale, and recommends next‑best actions under your institution’s policies and risk appetite.  
+- **Case management and reporting**: Store case files, analyst notes, LLM‑generated narratives, and audit trails as MongoDB documents. This creates a consistent, queryable record for compliance teams, internal audit, and regulators, and enables analytics on outcomes and false‑positive reduction. 
 
-.. figure:: /includes/images/industry-solutions/.svg
+.. figure:: /includes/images/industry-solutions/fincrime-mitigation-1.svg
    :figwidth: 750px
    :alt: Financial Crime Mitigation Platform 
 
-   Figure 1. Financial Crime Mitigation Platform with MongoDB
+   Figure 1. Financial Crime Mitigation Platform with MongoDB Atlas
 
 
 Reference Architectures
 ------------------------
+
+This solution consists of five core modules that together implement an
+end‑to‑end entity resolution and financial crime mitigation workflow: 
+
+Risk Model Management
+~~~~~~~~~~~~~~~~~~~~~~~
 
 **Real-Time Risk Intelligence with Change Streams**
 
@@ -98,6 +74,9 @@ Use MongoDB Change Streams to receive instant notifications when risk models, co
 When analysts activate a new risk model, all transaction screening engines receive the change within milliseconds and apply updated rules to incoming traffic. You remove batch delays that allow fraudulent transactions to clear before detection.  
   
 Open a Change Stream cursor on your risk models or configuration collections, and MongoDB pushes every insert, update, or replace operation to your application. Use resume tokens to restart processing from the exact point of interruption after service restarts or network failures, so you do not miss any updates. 
+
+Transaction Monitoring and Risk Scoring Engine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Semantic Fraud Pattern Detection with Vector Search**
 
@@ -120,11 +99,14 @@ Keep high‑signal numeric features—such as raw amount, balance changes, and s
   
 When you screen a new transaction, generate an embedding and query MongoDB Atlas with `$vectorSearch`. The system returns semantically similar transactions, including ones that evade static rules but resemble prior fraud in behavior. You can then combine vector similarity scores with numeric risk scores in a single risk decision pipeline. 
 
-.. figure:: /includes/images/industry-solutions/.svg
+.. figure:: /includes/images/industry-solutions/fincrime-mitigation-2.svg
    :figwidth: 750px
    :alt: Financial Crime Mitigation Platform 
 
    Figure 2. Real‑time fraud detection pipeline with Change Streams, Vector Search, and Risk Models.
+
+Entity Onboarding and Case Management
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **AI-Powered Entity Resolution with Hybrid Search**
 
@@ -135,6 +117,7 @@ For the top candidates, traverse relationship and transaction networks using `$g
 Feed entity data, search results, and network analysis into an LLM such as AWS Bedrock Claude‑3 Sonnet for AI‑assisted risk classification. The model evaluates compliance flags, relationship patterns, behavioral indicators, and watchlist matches to generate risk assessments with confidence scores and recommended actions. Create case documents automatically in MongoDB with LLM‑generated investigation summaries. You reduce manual report writing and improve the consistency of compliance documentation. 
 
 .. code-block:: javascript
+
    // Multi-hop relationship traversal with MongoDB $graphLookup
    db.entities.aggregate([
      {
@@ -198,6 +181,7 @@ Start with a suspicious entity and recursively traverse relationships through bu
 Discover networks across multiple hops in milliseconds, then combine graph results with standard aggregation operations such as filtering, sorting, and grouping. 
 
 .. code-block:: javascript
+
    // Multi-hop relationship traversal with MongoDB $graphLookup
    db.entities.aggregate([
      {
@@ -252,7 +236,7 @@ Discover networks across multiple hops in milliseconds, then combine graph resul
      },
    ]);
 
-.. figure:: /includes/images/industry-solutions/.svg
+.. figure:: /includes/images/industry-solutions/fincrime-mitigation-3.svg
    :figwidth: 750px
    :alt: Financial Crime Mitigation Platform 
 
@@ -300,6 +284,7 @@ Use standard indexes for operational workloads:
 Document Example with Nested Risk Factors
 
 .. code-block:: json
+
    {
      "_id": ObjectId("674a83b654c7f1b869cb1c2"),
      "customer_id": "CUST_67890",
@@ -378,6 +363,7 @@ Create [vector search indexes](https://www.mongodb.com/docs/atlas/atlas-vector-s
 Example Atlas Search Index Definition:
 
 .. code-block:: json
+
    {
      "mappings": {
        "dynamic": false,
